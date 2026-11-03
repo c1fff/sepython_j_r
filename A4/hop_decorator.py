@@ -21,7 +21,19 @@ def average(x, y):
     return (x+y)/2
     
 def newton(x):
-  return None  ##TODO
+    def isGoodEnough(guess):
+        return abs(square(guess) - x) < 0.001
+
+    def improve(guess):
+        return average(guess, x/guess)
+
+    def sqrtIter(guess):
+        if isGoodEnough(guess):
+            return guess
+        else:
+            return sqrtIter(improve(guess))
+
+    return sqrtIter(1.0)
   
 
 ##########################################################################
@@ -31,12 +43,22 @@ def newton(x):
 #Try a python-style approach, but keep the basic mode of operation (it shall still be an iterative improvement; do not simply use something like math.sqrt(x) or x ** 0.5)
 
 def newtonPy(x):
-  return None
+    guess = 1.0
+    while abs(guess*guess - x) >= 0.001:
+        guess = (guess + x/guess)/2
+    return guess
   
 
 ##########################################################################
 
 #Task 3: log-Decorator
+def log(f):
+    def wrapper(*args):
+        result = f(*args)
+        print(f"@log: {f.__name__}({','.join(map(str, args))}) -> {result}")
+        return result
+    return wrapper
+
 #Write a decorator 'log' that logs the invokation of functions (with parameters and result) as follows:
 
 #Example: The following code
@@ -60,6 +82,14 @@ helperfunction(1,2)
 # Important: your decorator shall support functions with an arbitrary number of arguments (but no keyword-arguments)
 
 import time
+
+def timeMe(f):
+    def wrapper(*args):
+        start = time.time()
+        result = f(*args)
+        print(f"@timeMe: {(time.time() - start)*1000:.2f} milliseconds")
+        return result
+    return wrapper
 
 #The following code:
 '''
@@ -103,12 +133,21 @@ testFunctionTime3(1,2,3)
 #Note that without the using the decorator already very low numbers (such as fib(35) will take quite a long time.  Can you explain, why this is the case?
 
 
-#TODO your memo-decorator goes here (before function 'fib')!
+def memo(f):
+    cache = {}
+    def wrapper(*args):
+        if args not in cache:
+            cache[args] = f(*args)
+        return cache[args]
+    return wrapper
+
+# Without memoization, fib repeatedly computes the same subproblems, taking
+# exponential time; caching computes each n once, reducing this to linear time.
 
 
 #calcultes the n-th fibonacci number
 
-#@memo   #todo uncomment after implementing memo
+@memo
 def fib(n):
   if n < 2:
     return n
